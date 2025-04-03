@@ -1,0 +1,396 @@
+﻿
+#Requires AutoHotkey v2.0
+#SingleInstance force
+#HotIf WinActive("OTplay")
+
+
+~Esc::{
+  ToolTip "reloading..."
+  sleep 1500
+  Reload
+}
+
+/*-------------
+
+click工資🔒10次開鎖
+-------------*/
+readMe0 := "
+(
+● 雙click 文字	清空相對應內容
+● 月份只是為截圖時記錄，無作用
+-------------
+15000
+2
+4
+6--474
+571.42857142857144
+809.77142857142871
+15385.657142857142
+-------------
+
+)"
+
+
+OnError doNothing
+doNothing(*){
+ return true
+}
+
+
+
+money00 := "BGJGF"	;psd
+OTmoney := ""
+clickX := 0		;鎖圖點擊計數
+lunchPrice := 79	;飯錢
+lockOnOff := "on"	;密碼模式ON
+
+
+m0 := ""
+guiWith0 := 350
+btnW := 50
+guiHight0 := 200
+edit2with := 50
+guiFont0 := 12
+;------------------ gui ------------------
+;mainGui := Gui("AlwaysOnTop", "OTplay")
+mainGui := Gui("", "OTplay")
+mainGui.SetFont("s" guiFont0, "Verdana")
+mainGui.OnEvent("Close", MyGuiClose)
+MyGuiClose(*){
+ ExitAPP 
+}
+txt1 := mainGui.Add("Text", "section", "工資🔒：")
+txt1.OnEvent("Click", clkCount)
+clkCount(*){
+  Global
+  clickX++
+
+  if clickX = 10 {
+	lockOnOff := "off"
+	  salM.value := ""
+        txt1.value := "工資🔓："
+    	}
+  if clickX > 5 {
+  ToolTip "           " clickX
+  SetTimer () => ToolTip(), -1000
+}
+  if clickX >10 {
+        txt1.value := "工資🔒："
+	clickX := 0
+	salM.value := 15000
+	lockOnOff := "on"
+	  ToolTip
+    		}  
+	}
+txt1.OnEvent("DoubleClick", clnTxt1)
+clnTxt1(*){
+ salM.value := "" 
+}
+
+
+
+
+
+salM := mainGui.Add("Edit", "x+ ys vM0 Password w" guiWith0, "15000")
+salM.OnEvent("Change", calM0)
+;---------------- 計算01 - calM0 ----------------
+calM0(*){	;正推
+  newValue0 := mainGui.Submit(false)
+
+fcusEdit := ControlGetFocus("A")
+fcusEditNn := ControlGetClassNN(fcusEdit)
+if fcusEditNn ="edit1"{				;工資顯示
+ ToolTip salM.value
+ SetTimer () => ToolTip(), -1000 
+}
+
+  if newValue0.M0 == "" {			;未輸入工資，使用預設值
+	  mneyC(money00)    ;msgbox outPut00
+	  newValue0.M0 := outPut00
+	}
+
+	M0C := newValue0.M0			;get工資
+	M1 := M0C/210 * newValue0.Mx
+	M2 := M0C/140 * newValue0.Md
+
+otPlay.value := M1 + M2				;大細鐘相加 = OT薪酬 / 更新 OT薪酬
+
+;------------- 計算MPF -------------
+if newValue0.cBox1 = 1 {
+  mpf.value := (newValue0.M0 + M1 + M2 + newValue0.eatP0 + 150)*0.05
+  }
+  else {
+  mpf.value := (newValue0.M0 + M1 + M2 + newValue0.eatP0)*0.05
+  }
+;------------- /計算MPF/ -------------
+
+finallyMoneyFx()  ;更新最後所得
+}  ;//calM0(*)
+;---------------- /計算01 - calM0/ ----------------
+
+
+
+txtreadme := mainGui.Add("Text", "ys x+2", "[？]")
+txtreadme.OnEvent("Click", btnReadmeFx)
+btnReadmeFx(*) {
+Global
+  MsgBox readMe0
+}
+
+
+
+
+
+
+
+
+
+
+
+txt2 := mainGui.Add("Text", "section xs", "細鐘：")
+txt2.OnEvent("DoubleClick", clnTxt2)
+clnTxt2(*){
+ otX.value := ""
+ ControlFocus otX
+}
+	otX := mainGui.Add("Edit", "x+ ys vMx w" edit2with, "")
+	otX.OnEvent("Change", calM0)
+mainGui.Add("Text", "x+ ys", "(小時) /210")
+
+txtMonth0 := mainGui.Add("ComboBox", "ys x" guiWith0 " w" edit2with, ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", ])
+txtMonth0.Text := A_MM
+mainGui.Add("Text", "x+ ys", "月")
+
+;mainGui.Add("ComboBox", "vcbbox0", ["文字一","文字二","文字三"])
+
+
+
+
+
+
+
+txt3 := mainGui.Add("Text", "section xs", "大鐘：")
+txt3.OnEvent("DoubleClick", clnTxt3)
+clnTxt3(*){
+ otD.value := ""
+ ControlFocus otD 
+}
+	otD := mainGui.Add("Edit", "x+ ys vMd w" edit2with, "")
+	otD.OnEvent("Change", calM0)
+mainGui.Add("Text", "x+ ys", "(小時) /140")
+
+
+
+
+
+
+
+mainGui.Add("Button", "ys default", "cal").OnEvent("Click", buttonFx)
+buttonFx(*) {
+run "C:\Windows\System32\calc.exe"
+}
+
+
+
+
+
+txt4 := mainGui.Add("Text", "section xs", "膳食津貼：")
+txt4.OnEvent("DoubleClick", clnTxt4)
+clnTxt4(*){
+ eatd.value := "" 
+ eatP.value := "" 
+}
+
+eatd := mainGui.Add("Edit", "x+ ys Number vrice00 w" edit2with, "")
+eatd.OnEvent("Change", ricPrice)
+	ricPrice(*){
+	newValue0 := mainGui.Submit(false)
+	if IsNumber(newValue0.rice00) == 0 {	;輸入為非數字
+	send "^a"
+	return
+	}
+	eatP.value := newValue0.rice00 * lunchPrice	;更新膳食津貼
+	calM0()						;填入膳食津貼後更新MPF
+		}
+
+mainGui.Add("Text", "x+ ys", "(d) *" lunchPrice)
+eatP := mainGui.Add("Edit", "ys veatP0 w" edit2with, "")
+
+
+
+
+
+txt5 := mainGui.Add("Text", "section xs", "OT薪酬：")
+txt5.OnEvent("DoubleClick", clnTxt5)
+	clnTxt5(*){
+		otPlay.value := ""
+		ControlFocus otPlay
+		}
+otPlay := mainGui.Add("Edit", "x+ ys vOTmoney", "")
+otPlay.OnEvent("Change", calSalary0)
+;---------------- 逆推工資 ----------------
+calSalary0(*){
+newValue0 := mainGui.Submit(false)
+	if IsNumber(newValue0.OTmoney) == 0 {	;輸入為非數字
+	send "^a"
+	return
+	}
+salaryPredic := (newValue0.OTmoney * 210 * 140) / (newValue0.Mx*140 + newValue0.Md*210)
+salM.value := salaryPredic
+;ToolTip salaryPredic
+;SetTimer () => ToolTip(), -5000
+;calM0()	;更新MPF
+}
+;---------------- /逆推工資/ ----------------
+mainGui.Add("Text", "ys", "(不含飯$)")
+
+
+
+
+
+cBox0 := mainGui.Add("CheckBox", "section xs vcBox1 Checked", "+特別津貼 $150")
+cBox0.OnEvent("Click", cBoxfx)
+cBoxfx(*){
+  calM0()
+}
+
+
+
+cBoxSal0 := mainGui.Add("CheckBox", "ys vcBoxSal1 -Checked", "顯示工資")
+cBoxSal0.OnEvent("Click", cBoxSalfx)
+cBoxSalfx(*){
+  newValue0 := mainGui.Submit(false)
+  if newValue0.cBoxSal1 = 1 {
+    salM.Focus()
+    if CaretGetPos(&x0, &y0)
+    ToolTip salM.value, x0+15, y0
+     }
+  Else{
+  ToolTip
+   }
+}
+
+
+
+
+
+
+
+
+
+txt6 := mainGui.Add("Text", "section xs", "MPF：")
+txt6.OnEvent("DoubleClick", clnTxt6)
+clnTxt6(*){
+ mpf.value := ""
+ ControlFocus mpf
+}
+	mpf := mainGui.Add("Edit", "x+ ys vmpf0 w" guiWith0/2, "")
+	;mpf.OnEvent("Change", calSalary0)
+mainGui.Add("Text", "ys", "(收入的5%)")
+
+
+
+txt7 := mainGui.Add("Text", "section xs", "到手：")
+finallyMoney := mainGui.Add("Edit", "x+ ys vfinallyMoney0 w" guiWith0/5*4, "")
+finallyMoneyFx(*){
+  newValue0 := mainGui.Submit(false)	;txt0.變量  名稱(含v開頭)
+
+  if newValue0.M0 == "" {			;未輸入工資，使用預設值
+	  mneyC(money00)    ;msgbox outPut00
+	  newValue0.M0 := outPut00
+	}
+
+  finalM0 := newValue0.M0 + otPlay.value + newValue0.eatP0 - newValue0.mpf0
+	if newValue0.cBox1 = 0{
+  	finallyMoney.value := finalM0
+	return
+	}
+	finallyMoney.value := finalM0 + 150
+}
+
+
+mainGui.Add("Text", "ys x+", "(-MPF)")
+;------------------ /gui/ ------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+mainGui.Show("xcenter ycenter")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;crack
+mneyC(x0, *){
+Global
+for c in StrSplit(x0) {
+	x0 .= Ord(c) - 65  ; 逆向計算 ASCII 碼差值
+	}
+outPut00 := StrReplace(x0, money00)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
