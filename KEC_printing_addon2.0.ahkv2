@@ -1,0 +1,229 @@
+﻿
+#Requires AutoHotkey v2.0
+#SingleInstance force
+
+winHide0 := 0
+
+date0 := ""
+classLoc := ""
+courseCode := ""
+time0 := ""
+
+
+k0 := 0
+kKEC := 0
+txtz := ""
+
+
+
+
+
+
+
+
+
+
+
+
+;@⬛Maping
+monthMap := Map(
+  "Jan", "01", "Feb", "02", "Mar", "03", "Apr", "04",
+  "May", "05", "Jun", "06", "Jul", "07", "Aug", "08",
+  "Sep", "09", "Oct", "10", "Nov", "11", "Dec", "12"
+)
+;Month0 := monthMap.Get(txt_y[2])
+
+
+;@⬛截取courseCode，整理
+getKecLine0(*) {
+Global
+	Loop Parse, clip0, "`n", "`r"{
+	txt0 := A_LoopField
+  		if A_index = 1 {
+  		txt_s := StrSplit(txt0, A_tab)
+		courseCode := txt_s[1]			;☑courseCode
+		Continue
+		}  ;//A_index = 1
+
+		;if InStr(txt0, "KEC") or InStr(txt0, "UNC") or InStr(txt0, "ADC") or InStr(txt0, "CITA") or InStr(txt0, "KEK") or InStr(txt0, "HPC") or InStr(txt0, "KWC") or InStr(txt0, "CST") or InStr(txt0, "FTC"){
+		if InStr(txt0, "KEC"){
+		clipNew .= txt0 "`n"
+		}
+	}  ;//Loop Parse, clip0
+anaClipNew0()
+}  ;//getKecLine0(*)
+
+
+
+
+anaClipNew0(*) {
+Global
+
+	Loop Parse, clipNew, "`n", "`r"{
+	txtx := StrSplit(A_LoopField, A_Tab)
+	if A_LoopField = ""{
+    	return
+	}
+
+
+		Loop txtx.length{
+		k0 := A_Index
+		txtLine := txtx[A_Index]
+			if InStr(txtLine, "KEC") {
+			kRoom := A_Index
+			classLoc := StrReplace(txtLine, "KEC")
+			continue
+			}
+
+
+			if InStr(txtLine, "/2025") and k0 = (kRoom+2) {	;在KEC後2格
+			txty := StrSplit(txtLine, "/")
+			Month0 := monthMap.Get(txty[2])
+			date0 := txty[3] "/" Month0 "/" txty[1]
+			;MsgBox date0
+			}
+
+			if InStr(txtLine, ":") and k0 = (kRoom+4) {	;在KEC後2格
+			time0 := txtLine
+			;MsgBox time0
+			}
+	}  ;//Loop txtx.length
+
+txtZ .= date0 "	" classLoc "	" time0 "	" courseCode "`n"
+	}  ;//Loop Parse, clipNew, "`n", "`r"
+
+}  ;//anaClipNew0(*)
+
+
+
+
+
+
+
+
+
+;------------------- /【窗口】/ --------------------
+;--------- winSetting ----------
+winT := "printingAddon"	;窗口名稱
+;winW := 400	;長
+;winH := 200	;高
+
+wdNme := "Verdana"	;字型
+wdSize := 12		;字大小
+
+;mainGuiBtnW := winW/5	;按鈕大小
+;--------- /winSetting/ ----------
+
+mainGui := Gui("AlwaysOnTop +Caption", winT)
+mainGui.SetFont("w100 s" wdSize, wdNme)
+
+;●txt1
+txtNme1 := mainGui.Add("Text", "section vtxt1", "KE")
+txtNme1.OnEvent("Click", txtNme1Fx)	;DoubleClick
+	txtNme1Fx(*){
+	  Global
+	  
+	}
+
+;●edit1
+editNme1 := mainGui.Add("Edit", "x+ ys vedit1 w120", "")
+
+
+;●Radio
+mainGui.Add("Radio", "xs section vMyRadio1", "2025/26?")
+mainGui.Add("Radio", "ys vMyRadio2 checked", "2024/25")
+
+
+;●Button
+btn01 := mainGui.Add("Button", "section xs", "[今]")
+btn01.OnEvent("Click", btn01Fx)	;DoubleClick/Focus/LoseFocus
+	btn01Fx(*) {
+	Global
+	todayDate0 := FormatTime(, "yyyy/MM/dd")
+
+	loc01 := "https://rburpt.hkuspace.hku.hk/SplusReportsEVEN/default.aspx?oneday&p1=KEC&p2=" todayDate0 "&p3=00:00&p4=23:59"	;⬛2024/25(2 Sep 2024 to 31 Aug 2025)
+	run "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe " loc01
+	  ;mainGui.Destroy()
+	}
+;---------------
+btn02 := mainGui.Add("Button", "ys x+", "[搜Code]")
+btn02.OnEvent("Click", btn02Fx)	;DoubleClick/Focus/LoseFocus
+	btn02Fx(*) {
+	  Global
+	loc01 := "https://rburpt.hkuspace.hku.hk/splusreportseven/course.htm"
+	run "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe " loc01
+	;msgbox "press ok while loading completed."
+	sleep 8000
+	send "{tab}"
+	sleep 800
+	send "^v"
+	sleep 800
+	send "{enter}"
+	}
+;---------------
+btn03 := mainGui.Add("Button", "ys x+", "[？]")
+btn03.OnEvent("Click", btn03Fx)	;DoubleClick/Focus/LoseFocus
+	btn03Fx(*) {
+	  Global
+	loc01 := "https://rburpt.hkuspace.hku.hk/splusreportseven/oneday.htm"
+	run "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe " loc01
+	}
+
+
+mainGui.Show("AutoSize")
+mainGui.OnEvent("Close", gui0X)
+
+
+
+;@⬛快捷鍵
+#HotIf WinExist(winT)
+~esc::gui0X()
+	gui0X(*) {
+	  Global
+	  ;mainGui.Destroy()
+	  mainGui.Hide()
+	  winHide0 := 1
+	}
+
+~LControl & numpadEnter::{
+Global
+clipNew := ""
+k0 := 0
+txtZ := ""
+
+clip0 := A_Clipboard
+getKecLine0()
+A_Clipboard := txtz
+sleep 500
+send "^v"
+;txtz := ""
+;ToolTip txtz
+}
+
+
+#HotIf winHide0 := 1
+~LControl & numpadEnter::guiShow()
+	guiShow(*) {
+	mainGui.Show("AutoSize")
+ToolTip winHide0
+	}
+
+;------------------- /【窗口】/ --------------------
+
+
+
+NumpadEnter::reload
+;~Esc::ExitApp
+
+
+
+
+
+
+
+
+
+
+
+
+
